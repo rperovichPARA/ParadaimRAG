@@ -13,7 +13,6 @@
       parse: function(text) {
         if (!text) return '';
         
-        // First, handle tables before other processing
         const tableRegex = /(?:^|\n)((?:\|[^\n]+\|\n)+)/g;
         text = text.replace(tableRegex, (match, tableContent) => {
           const rows = tableContent.trim().split('\n');
@@ -21,22 +20,14 @@
           
           let html = '<table>';
           rows.forEach((row, index) => {
-            // Skip separator row (contains only |, -, :, spaces)
             if (/^[\|\-\:\s]+$/.test(row)) return;
-            
             const cells = row.split('|').filter(cell => cell.trim() !== '');
             const tag = index === 0 ? 'th' : 'td';
-            const rowTag = index === 0 ? 'thead' : (index === 1 ? 'tbody' : '');
-            
             if (index === 0) html += '<thead>';
             if (index === 1) html += '<tbody>';
-            
             html += '<tr>';
-            cells.forEach(cell => {
-              html += `<${tag}>${cell.trim()}</${tag}>`;
-            });
+            cells.forEach(cell => { html += `<${tag}>${cell.trim()}</${tag}>`; });
             html += '</tr>';
-            
             if (index === 0) html += '</thead>';
           });
           html += '</tbody></table>';
@@ -47,7 +38,6 @@
           .replace(/&/g, '&amp;')
           .replace(/</g, '&lt;')
           .replace(/>/g, '&gt;')
-          // Restore table tags that got escaped
           .replace(/&lt;table&gt;/g, '<table>')
           .replace(/&lt;\/table&gt;/g, '</table>')
           .replace(/&lt;thead&gt;/g, '<thead>')
@@ -115,13 +105,11 @@
       --accent-primary: #10b981;
       --accent-primary-dim: rgba(16, 185, 129, 0.15);
       --accent-blue: #3b82f6;
+      --accent-amber: #f59e0b;
+      --accent-purple: #a78bfa;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Outfit', sans-serif;
@@ -177,7 +165,7 @@
     .config-section {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 1.25rem;
     }
 
     .config-section label {
@@ -211,6 +199,62 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
+    }
+
+    /* Toggle Switch */
+    .toggle-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .toggle-group label {
+      font-size: 0.9375rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: var(--border-accent);
+      border-radius: 20px;
+      transition: background 0.2s ease;
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background: var(--text-primary);
+      border-radius: 50%;
+      transition: transform 0.2s ease;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      background: var(--accent-purple);
+    }
+
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(16px);
     }
 
     .status-indicator {
@@ -304,18 +348,9 @@
       min-height: 0;
     }
 
-    .panel-content::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .panel-content::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    .panel-content::-webkit-scrollbar-thumb {
-      background: var(--border-accent);
-      border-radius: 3px;
-    }
+    .panel-content::-webkit-scrollbar { width: 6px; }
+    .panel-content::-webkit-scrollbar-track { background: transparent; }
+    .panel-content::-webkit-scrollbar-thumb { background: var(--border-accent); border-radius: 3px; }
 
     .message {
       margin-bottom: 1rem;
@@ -359,7 +394,7 @@
       margin-bottom: 0.5rem;
     }
 
-    .message-content h1:first-child, .message-content h2:first-child, 
+    .message-content h1:first-child, .message-content h2:first-child,
     .message-content h3:first-child, .message-content h4:first-child {
       margin-top: 0;
     }
@@ -378,27 +413,11 @@
       font-size: 0.8125rem;
     }
 
-    .message-content ul {
-      margin: 0.5rem 0;
-      padding-left: 1.5rem;
-    }
-
-    .message-content li {
-      margin: 0.25rem 0;
-    }
-
-    .message-content strong {
-      color: var(--text-primary);
-    }
-
-    .message-content a {
-      color: var(--accent-blue);
-      text-decoration: none;
-    }
-
-    .message-content a:hover {
-      text-decoration: underline;
-    }
+    .message-content ul { margin: 0.5rem 0; padding-left: 1.5rem; }
+    .message-content li { margin: 0.25rem 0; }
+    .message-content strong { color: var(--text-primary); }
+    .message-content a { color: var(--accent-blue); text-decoration: none; }
+    .message-content a:hover { text-decoration: underline; }
 
     .message-content table {
       width: 100%;
@@ -420,16 +439,101 @@
       font-weight: 600;
     }
 
-    .message-content td {
+    .message-content td { background: var(--bg-primary); }
+    .message-content tr:hover td { background: var(--bg-tertiary); }
+    .message-content tbody tr:nth-child(even) td { background: rgba(255, 255, 255, 0.02); }
+
+    /* Inline Steps */
+    .inline-step {
+      margin-bottom: 0.75rem;
+      border-left: 3px solid var(--accent-purple);
+      padding: 0.75rem 1rem;
+      background: rgba(167, 139, 250, 0.05);
+      border-radius: 0 8px 8px 0;
+      animation: stepFadeIn 0.4s ease;
+    }
+
+    @keyframes stepFadeIn {
+      from { opacity: 0; transform: translateX(-8px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .inline-step-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .inline-step-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(167, 139, 250, 0.2);
+      color: var(--accent-purple);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .inline-step-tool {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8125rem;
+      color: var(--accent-purple);
+      font-weight: 500;
+    }
+
+    .inline-step-query-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      margin-bottom: 0.375rem;
+    }
+
+    .inline-step-label {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .inline-step-query-text {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    .inline-step-retrieved {
+      margin-top: 0.375rem;
+    }
+
+    .inline-step-chunks {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      line-height: 1.5;
       background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.5rem 0.625rem;
+      max-height: 100px;
+      overflow-y: auto;
+      word-break: break-word;
+      margin-top: 0.25rem;
     }
 
-    .message-content tr:hover td {
-      background: var(--bg-tertiary);
-    }
+    .inline-step-chunks::-webkit-scrollbar { width: 4px; }
+    .inline-step-chunks::-webkit-scrollbar-track { background: transparent; }
+    .inline-step-chunks::-webkit-scrollbar-thumb { background: var(--border-accent); border-radius: 2px; }
 
-    .message-content tbody tr:nth-child(even) td {
-      background: rgba(255, 255, 255, 0.02);
+    /* Hidden steps when toggle is off */
+    body.hide-steps .inline-step {
+      display: none;
     }
 
     .loading-indicator {
@@ -462,7 +566,7 @@
       40% { transform: scale(1); opacity: 1; }
     }
 
-    /* Input Area - Now in main content */
+    /* Input Area */
     .input-area {
       padding: 1rem;
       background: var(--bg-card);
@@ -523,18 +627,9 @@
       gap: 0.5rem;
     }
 
-    .send-button:hover:not(:disabled) {
-      opacity: 0.9;
-    }
-
-    .send-button:active:not(:disabled) {
-      transform: scale(0.98);
-    }
-
-    .send-button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+    .send-button:hover:not(:disabled) { opacity: 0.9; }
+    .send-button:active:not(:disabled) { transform: scale(0.98); }
+    .send-button:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* Execution Log */
     .log-panel {
@@ -557,9 +652,7 @@
       user-select: none;
     }
 
-    .log-header:hover {
-      background: var(--bg-secondary);
-    }
+    .log-header:hover { background: var(--bg-secondary); }
 
     .log-title {
       font-size: 0.75rem;
@@ -576,13 +669,8 @@
       transition: transform 0.2s;
     }
 
-    .log-panel.collapsed .log-toggle {
-      transform: rotate(-90deg);
-    }
-
-    .log-panel.collapsed .log-content {
-      display: none;
-    }
+    .log-panel.collapsed .log-toggle { transform: rotate(-90deg); }
+    .log-panel.collapsed .log-content { display: none; }
 
     .log-content {
       padding: 0.5rem;
@@ -620,21 +708,9 @@
       padding: 2rem;
     }
 
-    .empty-state-icon {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      opacity: 0.5;
-    }
-
-    .empty-state-text {
-      font-size: 1.125rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .empty-state-hint {
-      font-size: 0.9375rem;
-      opacity: 0.7;
-    }
+    .empty-state-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+    .empty-state-text { font-size: 1.125rem; margin-bottom: 0.5rem; }
+    .empty-state-hint { font-size: 0.9375rem; opacity: 0.7; }
   </style>
 </head>
 <body>
@@ -660,6 +736,14 @@
           <option value="openai">GPT</option>
           <option value="gemini">Gemini</option>
         </select>
+      </div>
+
+      <div class="toggle-group">
+        <label for="steps-toggle">Steps</label>
+        <div class="toggle-switch">
+          <input type="checkbox" id="steps-toggle" checked>
+          <span class="toggle-slider"></span>
+        </div>
       </div>
       
       <div class="status-indicator">
@@ -689,7 +773,6 @@
       </div>
     </div>
 
-    <!-- Input Area moved above log -->
     <div class="input-area">
       <div class="input-container">
         <div class="input-wrapper">
@@ -728,6 +811,7 @@
     // Elements
     const workflowSelect = document.getElementById('workflow-select');
     const modelSelect = document.getElementById('model-select');
+    const stepsToggle = document.getElementById('steps-toggle');
     const queryInput = document.getElementById('query-input');
     const sendButton = document.getElementById('send-button');
     const messagesEl = document.getElementById('messages');
@@ -739,6 +823,17 @@
 
     let messages = [];
     let isLoading = false;
+
+    // Steps toggle handler
+    stepsToggle.addEventListener('change', () => {
+      if (stepsToggle.checked) {
+        document.body.classList.remove('hide-steps');
+        addLog('Steps display: ON', 'info');
+      } else {
+        document.body.classList.add('hide-steps');
+        addLog('Steps display: OFF', 'info');
+      }
+    });
 
     // Auto-resize textarea
     queryInput.addEventListener('input', function() {
@@ -761,6 +856,42 @@
       logContent.scrollTop = logContent.scrollHeight;
     }
 
+    // Escape HTML
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Build inline steps HTML
+    function buildInlineStepsHtml(steps) {
+      if (!steps || steps.length === 0) return '';
+      
+      return steps.map((step, i) => {
+        let html = `<div class="inline-step">`;
+        html += `<div class="inline-step-header">`;
+        html += `<div class="inline-step-icon">${i + 1}</div>`;
+        html += `<div class="inline-step-tool">${escapeHtml(step.tool)}</div>`;
+        html += `</div>`;
+
+        html += `<div class="inline-step-query-row">`;
+        html += `<span class="inline-step-label">Search:</span>`;
+        html += `<span class="inline-step-query-text">"${escapeHtml(step.query)}"</span>`;
+        html += `</div>`;
+
+        if (step.observation) {
+          html += `<div class="inline-step-retrieved">`;
+          html += `<div class="inline-step-label">Retrieved chunks</div>`;
+          html += `<div class="inline-step-chunks">${escapeHtml(step.observation)}</div>`;
+          html += `</div>`;
+        }
+
+        html += `</div>`;
+        return html;
+      }).join('');
+    }
+
     // Render messages
     function renderMessages() {
       if (messages.length === 0) {
@@ -775,9 +906,13 @@
       }
 
       messagesEl.innerHTML = messages.map(msg => {
-        const className = msg.role === 'user' ? 'message-user' : 'message-assistant';
-        const content = msg.role === 'user' ? msg.content : marked.parse(msg.content);
-        return `<div class="message ${className}"><div class="message-content">${content}</div></div>`;
+        if (msg.role === 'user') {
+          return `<div class="message message-user"><div class="message-content">${escapeHtml(msg.content)}</div></div>`;
+        } else if (msg.role === 'steps') {
+          return buildInlineStepsHtml(msg.steps);
+        } else {
+          return `<div class="message message-assistant"><div class="message-content">${marked.parse(msg.content)}</div></div>`;
+        }
       }).join('');
 
       messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -805,15 +940,15 @@
 
     // Typewriter effect
     async function addTypingMessage(content) {
-      const speed = 5; // ms per character
+      const speed = 5;
       
       messages.push({ role: 'assistant', content: '' });
       const msgIndex = messages.length - 1;
       
       renderMessages();
       
-      const messageEls = messagesEl.querySelectorAll('.message-assistant');
-      const targetEl = messageEls[messageEls.length - 1];
+      const assistantEls = messagesEl.querySelectorAll('.message-assistant');
+      const targetEl = assistantEls[assistantEls.length - 1];
       const contentEl = targetEl.querySelector('.message-content');
       
       for (let i = 0; i <= content.length; i++) {
@@ -852,17 +987,15 @@
       const startTime = Date.now();
 
       try {
-        // Build conversation history for context (last 10 messages)
-        const history = messages.slice(-10).map(m => ({
+        // Build conversation history (last 10, exclude steps)
+        const history = messages.filter(m => m.role !== 'steps').slice(-10).map(m => ({
           role: m.role === 'user' ? 'user' : 'assistant',
           content: m.content
         }));
 
         const response = await fetch(webhookUrl, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             query: query,
             chatInput: query,
@@ -885,6 +1018,14 @@
         // Hide loading
         hideLoading();
 
+        // Add intermediate steps inline (before the response)
+        const steps = data.steps || [];
+        if (steps.length > 0) {
+          messages.push({ role: 'steps', steps: steps });
+          renderMessages();
+          addLog(`Tools: ${steps.map(s => s.tool).join(', ')}`, 'info');
+        }
+
         // Get response content
         const responseContent = data.response || data.rag || data.output || 'No response received';
         
@@ -900,14 +1041,10 @@
 
       } catch (error) {
         hideLoading();
-
         statusDot.classList.add('error');
         statusText.textContent = 'Error';
-
-        // Add error message
         messages.push({ role: 'assistant', content: `Error: ${error.message}` });
         renderMessages();
-
         addLog(`Request failed: ${error.message}`, 'error');
       }
 
