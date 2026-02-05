@@ -457,7 +457,7 @@
         <label>Workflow:</label>
         <select id="workflow-select">
           <option value="portfolio">Portfolio Director</option>
-          <option value="candidate">Candidate Finder</option>
+          <option value="advisor">Corporate Advisor</option>
         </select>
       </div>
       <div class="config-group">
@@ -493,7 +493,7 @@
           <div class="empty-state">
             <div class="empty-state-icon">📊</div>
             <div class="empty-state-text">Paradaim RAG Model Ready</div>
-            <div class="empty-state-hint">Ask about your portfolio or candidates</div>
+            <div class="empty-state-hint">Ask about the PARA model, the portfolio, candidates, corporate recommendations and strategy...</div>
           </div>
         </div>
       </div>
@@ -501,7 +501,7 @@
     <div class="input-area">
       <div class="input-container">
         <div class="input-wrapper">
-          <textarea id="query-input" placeholder="Ask about your portfolio or candidates..." rows="1"></textarea>
+          <textarea id="query-input" placeholder="Ask about the PARA model, the portfolio, candidates, corporate recommendations and strategy..." rows="1"></textarea>
         </div>
         <button class="send-button" id="send-button"><span>Send</span><span>→</span></button>
       </div>
@@ -518,7 +518,7 @@
   <script>
     const WORKFLOWS = {
       portfolio: 'https://rperovich.app.n8n.cloud/webhook/portfolio.director',
-      candidate: 'https://rperovich.app.n8n.cloud/webhook-test/equity.rag.compare'
+      advisor: 'https://rperovich.app.n8n.cloud/webhook/corporate.advisor'
     };
 
     const workflowSelect = document.getElementById('workflow-select');
@@ -684,7 +684,7 @@
 
     function renderMessages() {
       if (messages.length === 0) {
-        messagesEl.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📊</div><div class="empty-state-text">Paradaim RAG Model Ready</div><div class="empty-state-hint">Ask about your portfolio or candidates</div></div>';
+        messagesEl.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📊</div><div class="empty-state-text">Paradaim RAG Model Ready</div><div class="empty-state-hint">Ask about the PARA model, the portfolio, candidates, corporate recommendations and strategy...</div></div>';
         return;
       }
       messagesEl.innerHTML = messages.map(function(msg) {
@@ -746,7 +746,7 @@
       renderMessages();
       showLoading();
 
-      var workflowName = workflowSelect.value === 'portfolio' ? 'Portfolio Director' : 'Candidate Finder';
+      var workflowName = workflowSelect.value === 'portfolio' ? 'Portfolio Director' : 'Corporate Advisor';
       addLog('Query: "' + query.substring(0, 50) + (query.length > 50 ? '...' : '') + '" via ' + workflowName, 'info');
 
       var startTime = Date.now();
@@ -807,7 +807,7 @@
     });
 
     workflowSelect.addEventListener('change', function() {
-      addLog('Workflow: ' + (workflowSelect.value === 'portfolio' ? 'Portfolio Director' : 'Candidate Finder'), 'info');
+      addLog('Workflow: ' + (workflowSelect.value === 'portfolio' ? 'Portfolio Director' : 'Corporate Advisor'), 'info');
     });
     modelSelect.addEventListener('change', function() {
       var n = modelSelect.value === 'anthropic' ? 'Claude' : modelSelect.value === 'openai' ? 'GPT' : 'Gemini';
